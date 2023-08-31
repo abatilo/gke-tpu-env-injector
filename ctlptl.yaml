@@ -1,0 +1,11 @@
+---
+apiVersion: ctlptl.dev/v1alpha1
+kind: Registry
+name: kind-gke-tpu-env-injector-registry
+port: 5005
+---
+apiVersion: ctlptl.dev/v1alpha1
+kind: Cluster
+product: kind
+name: kind-gke-tpu-env-injector
+registry: kind-gke-tpu-env-injector-registry

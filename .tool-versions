@@ -1,0 +1,5 @@
+golang 1.21.0
+ctlptl 0.8.21
+kind 0.20.0
+skaffold 2.6.3
+kubectl 1.28.1

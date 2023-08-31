@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: gke-tpu-env-injector
+build:
+  platforms:
+  - linux/amd64
+  artifacts:
+  - image: injector
+    ko: {}
+manifests:
+  helm:
+    releases:
+    - name: gke-tpu-env-injector
+      chartPath: chart
+      setValueTemplates:
+        image.repository: "{{.IMAGE_REPO_injector}}"
+        image.tag: "{{.IMAGE_TAG_injector}}@{{.IMAGE_DIGEST_injector}}"
+portForward:
+- resourceType: service
+  resourceName: gke-tpu-env-injector
+  port: 80
+  localPort: 8000
