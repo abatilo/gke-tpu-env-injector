@@ -4,3 +4,8 @@ description: A Helm chart for gke-tpu-env-injector
 type: application
 version: 0.1.0
 appVersion: "0.1.0"
+dependencies:
+  - name: cert-manager
+    condition: cert-manager.enabled
+    repository: https://charts.jetstack.io
+    version: v1.12.3

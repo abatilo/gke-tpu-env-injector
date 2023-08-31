@@ -16,8 +16,12 @@ manifests:
       setValueTemplates:
         image.repository: "{{.IMAGE_REPO_injector}}"
         image.tag: "{{.IMAGE_TAG_injector}}@{{.IMAGE_DIGEST_injector}}"
+      setValues:
+        cert-manager:
+          enabled: true
 portForward:
 - resourceType: service
   resourceName: gke-tpu-env-injector
+  namespace: default
   port: 80
   localPort: 8000

@@ -75,3 +75,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+cert-manager:
+  enabled: false
+  installCRDs: true
