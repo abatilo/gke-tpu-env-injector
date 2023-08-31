@@ -7,7 +7,7 @@ build:
   - linux/amd64
   artifacts:
   - image: injector
-    ko: {}
+    context: .
 manifests:
   helm:
     releases:
