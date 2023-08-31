@@ -17,6 +17,11 @@ up: asdf-bootstrap ## Run dev environment
 	ctlptl apply -f ctlptl.yaml
 	skaffold dev
 
+.PHONY: ci
+ci: ## Setup CI environment
+	ctlptl apply -f ctlptl.yaml
+	skaffold run
+
 .PHONY: clean
 clean: ## Delete all dev environment resources
 	ctlptl delete -f ctlptl.yaml
