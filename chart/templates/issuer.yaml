@@ -1,0 +1,10 @@
+{{- if (index .Values "cert-manager" "enabled") }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "chart.fullname" . }}
+spec:
+  ca:
+    secretName: {{ include "chart.fullname" . }}-root-secret
+{{- end -}}

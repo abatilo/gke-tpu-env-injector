@@ -18,13 +18,15 @@ helm-bootstrap: ## Add helm repos
 	helm repo update
 
 .PHONY: up
-up: asdf-bootstrap ## Run dev environment
+up: asdf-bootstrap helm-bootstrap ## Run dev environment
 	ctlptl apply -f ctlptl.yaml
+	helm upgrade --install cert-manager jetstack/cert-manager --set installCRDs=true --namespace cert-manager --create-namespace --version v1.12.3
 	skaffold dev
 
 .PHONY: ci
 ci: helm-bootstrap ## Setup CI environment
 	ctlptl apply -f ctlptl.yaml
+	helm upgrade --install cert-manager jetstack/cert-manager --set installCRDs=true --namespace cert-manager --create-namespace --version v1.12.3
 	skaffold run
 
 .PHONY: clean
