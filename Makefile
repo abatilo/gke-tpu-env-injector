@@ -16,7 +16,6 @@ asdf-bootstrap: .tool-versions
 helm-bootstrap: ## Add helm repos
 	helm repo add jetstack https://charts.jetstack.io
 	helm repo update
-	helm upgrade --install cert-manager jetstack/cert-manager --set installCRDs=true --namespace cert-manager --create-namespace --version v1.12.3
 
 .PHONY: up
 up: asdf-bootstrap helm-bootstrap ## Run dev environment

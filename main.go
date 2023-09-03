@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -11,8 +12,12 @@ func main() {
 		fmt.Fprint(w, "gke-tpu-env-injector")
 	})
 	srv := &http.Server{
-		Addr:    ":8000",
+		Addr:    ":443",
 		Handler: mux,
 	}
-	_ = srv.ListenAndServe()
+	log.Println("Listening on :443")
+	err := srv.ListenAndServeTLS("/etc/tls/tls.crt", "/etc/tls/tls.key")
+	if err != nil {
+		panic(err)
+	}
 }
