@@ -12,13 +12,18 @@ help: ## View help information
 asdf-bootstrap: .tool-versions
 	cat .tool-versions | cut -f 1 -d ' ' | xargs -n 1 asdf plugin-add || true
 
+.PHONY: helm-bootstrap
+helm-bootstrap: ## Add helm repos
+	helm repo add jetstack https://charts.jetstack.io
+	helm repo update
+
 .PHONY: up
 up: asdf-bootstrap ## Run dev environment
 	ctlptl apply -f ctlptl.yaml
 	skaffold dev
 
 .PHONY: ci
-ci: ## Setup CI environment
+ci: helm-bootstrap ## Setup CI environment
 	ctlptl apply -f ctlptl.yaml
 	skaffold run
 
