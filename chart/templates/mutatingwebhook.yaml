@@ -1,0 +1,29 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "chart.fullname" . }}-webhook-cfg
+  labels:
+    {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "chart.fullname" . }}-ca
+webhooks:
+  - name: gke-tpu-env-injector.aaronbatilo.dev
+    admissionReviewVersions: [v1beta1, v1]
+    sideEffects: NoneOnDryRun
+    clientConfig:
+      service:
+        name: {{ include "chart.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: "/mutate"
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        resources: ["statefulsets"]
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    objectSelector:
+      matchLabels:
+        gke-tpu-env-injector.aaronbatilo.dev/inject: enabled
