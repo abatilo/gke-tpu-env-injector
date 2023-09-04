@@ -55,11 +55,14 @@ spec:
               scheme: HTTPS
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if (index .Values "cert-manager" "enabled") }}
           volumeMounts:
+          {{- if (index .Values "cert-manager" "enabled") }}
           - name: certs
             mountPath: /etc/tls/
             readOnly: true
+          {{- end -}}
+          {{- with .Values.additionalVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
           {{- end -}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -73,9 +76,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if (index .Values "cert-manager" "enabled") }}
       volumes:
+      {{- if (index .Values "cert-manager" "enabled") }}
       - name: certs
         secret:
           secretName: {{ include "chart.fullname" . }}
+      {{- end -}}
+      {{- with .Values.volumes }}
+        {{- toYaml . | nindent 6 }}
       {{- end -}}
