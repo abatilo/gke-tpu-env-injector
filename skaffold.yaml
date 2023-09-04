@@ -23,5 +23,5 @@ portForward:
 - resourceType: service
   resourceName: gke-tpu-env-injector
   namespace: default
-  port: 80
+  port: 443
   localPort: 8000

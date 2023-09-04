@@ -11,6 +11,6 @@ jobs:
       - name: Deploy for CI
         run: |
           make ci
-          kubectl port-forward svc/gke-tpu-env-injector 8000:80 &
-          sleep 5
-          curl http://localhost:8000/
+          kubectl port-forward svc/gke-tpu-env-injector 8000:443 &
+          sleep 30
+          curl --insecure https://localhost:8000/

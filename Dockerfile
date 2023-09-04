@@ -12,5 +12,5 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-w -s" -o
 FROM scratch
 COPY --from=builder /go/bin/gke-tpu-env-injector /usr/local/bin/gke-tpu-env-injector
 
-EXPOSE 8000
+EXPOSE 443
 ENTRYPOINT ["gke-tpu-env-injector"]
