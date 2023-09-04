@@ -35,9 +35,35 @@ additionalArguments: []
 # - --tls-cert-file=/etc/tls/tls.crt
 # - --tls-key-file=/etc/tls/tls.key
 
+volumes: []
+# - name: certs
+#   secret:
+#     secretName: gke-tpu-env-injector
+
+additionalVolumeMounts: []
+# - name: certs
+#   mountPath: /etc/tls/
+#   readOnly: true
+
 service:
   type: ClusterIP
   port: 443
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
