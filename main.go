@@ -47,14 +47,24 @@ func mutateStatefulSet(
 	patches := []map[string]interface{}{}
 	for i := 0; i < len(statefulset.Spec.Template.Spec.Containers); i++ {
 		patch := map[string]interface{}{
-			"op":   "add",
-			"path": fmt.Sprintf("/spec/template/spec/containers/%d/env", i),
-			"value": []corev1.EnvVar{
-				{
-					Name:  "TPU_WORKER_HOSTNAMES",
-					Value: joinedHostNames,
-				},
-			},
+			"op": "add",
+		}
+		container := statefulset.Spec.Template.Spec.Containers[i]
+		path := fmt.Sprintf("/spec/template/spec/containers/%d/env", i)
+		value := corev1.EnvVar{
+			Name:  "TPU_WORKER_HOSTNAMES",
+			Value: joinedHostNames,
+		}
+
+		if len(container.Env) == 0 {
+			// If there aren't any environment variables, set env to an array
+			patch["path"] = path
+			patch["value"] = []corev1.EnvVar{value}
+		} else {
+			// When there are already environment variables, append to the array with
+			// a single item
+			patch["path"] = fmt.Sprintf("%s/-", path)
+			patch["value"] = value
 		}
 		patches = append(patches, patch)
 	}
