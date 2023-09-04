@@ -55,3 +55,9 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Publish helm chart
+        run: |
+          export CHART_VERSION=$(grep 'version:' ./chart/Chart.yaml | tail -n1 | awk '{ print $2 }')
+          helm package chart
+          helm push gke-tpu-env-injector-${CHART_VERSION}.tgz oci://ghcr.io/abatilo
