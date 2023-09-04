@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	admissionv1 "k8s.io/api/admission/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -144,6 +146,27 @@ func mutatePod(
 }
 
 func main() {
+	viper.SetEnvPrefix("GTEI")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
+
+	pflag.String(
+		FlagTLSCertFile,
+		"/etc/tls/tls.crt",
+		"File containing the default x509 Certificate for HTTPS.",
+	)
+	pflag.String(
+		FlagTLSKeyFile,
+		"/etc/tls/tls.key",
+		"File containing the default x509 private key matching --tls-cert-file.",
+	)
+
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
+	tlsCertFilePath := viper.GetString(FlagTLSCertFile)
+	tlsKeyFilePath := viper.GetString(FlagTLSKeyFile)
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +202,7 @@ func main() {
 		Handler: mux,
 	}
 	log.Println("Listening on :443")
-	err := srv.ListenAndServeTLS("/etc/tls/tls.crt", "/etc/tls/tls.key")
+	err := srv.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath)
 	if err != nil {
 		panic(err)
 	}

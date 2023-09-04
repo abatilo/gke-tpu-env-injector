@@ -4,6 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download -x
 
+COPY config.go ./
 COPY main.go ./
 # Purposefully set AFTER downloading and caching dependencies
 ARG TARGETOS TARGETARCH
