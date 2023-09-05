@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 	"strings"
 
+	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -132,7 +133,6 @@ func mutatePod(
 		patches = append(patches, patch)
 	}
 	patchBytes, _ := json.Marshal(patches)
-	fmt.Println(string(patchBytes))
 
 	admissionResponse := &admissionv1.AdmissionResponse{
 		Allowed: true,
@@ -160,12 +160,26 @@ func main() {
 		"/etc/tls/tls.key",
 		"File containing the default x509 private key matching --tls-cert-file.",
 	)
+	pflag.Bool(
+		FlagVerbose,
+		false,
+		"Enable verbose logging.",
+	)
 
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	log := zerolog.New(os.Stdout).With().Timestamp().Logger()
+
 	tlsCertFilePath := viper.GetString(FlagTLSCertFile)
 	tlsKeyFilePath := viper.GetString(FlagTLSKeyFile)
+	verbose := viper.GetBool(FlagVerbose)
+
+	if verbose {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Debug().Msg("Verbose logging enabled")
+	}
 
 	mux := http.NewServeMux()
 
@@ -173,16 +187,14 @@ func main() {
 		fmt.Fprint(w, "gke-tpu-env-injector")
 	})
 	mux.HandleFunc("/mutate", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Received webhook request")
-
 		admissionReview := &admissionv1.AdmissionReview{}
 		if err := json.NewDecoder(r.Body).Decode(admissionReview); err != nil {
-			log.Println("Error decoding request body")
 			http.Error(w, "Error decoding request body", http.StatusBadRequest)
 			return
 		}
 
 		if admissionReview.Request.Kind.Kind == "StatefulSet" {
+			log.Debug().Msg("Received review for StatefulSet")
 			admissionReview.Response, _ = mutateStatefulSet(admissionReview)
 			responseBytes, _ := json.Marshal(admissionReview)
 			fmt.Fprint(w, string(responseBytes))
@@ -190,6 +202,7 @@ func main() {
 		}
 
 		if admissionReview.Request.Kind.Kind == "Pod" {
+			log.Debug().Msg("Received review for Pod")
 			admissionReview.Response, _ = mutatePod(admissionReview)
 			responseBytes, _ := json.Marshal(admissionReview)
 			fmt.Fprint(w, string(responseBytes))
@@ -201,9 +214,13 @@ func main() {
 		Addr:    ":443",
 		Handler: mux,
 	}
-	log.Println("Listening on :443")
-	err := srv.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath)
-	if err != nil {
-		panic(err)
+
+	log.Info().Msg("Starting server on port 443")
+	if err := srv.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath); err != nil {
+		if err == http.ErrServerClosed {
+			log.Info().Msg("Server closed")
+			return
+		}
+		log.Fatal().Err(err).Msg("Failed to start server")
 	}
 }
