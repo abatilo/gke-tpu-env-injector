@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
@@ -146,6 +149,8 @@ func mutatePod(
 }
 
 func main() {
+	ctx := context.Background()
+
 	viper.SetEnvPrefix("GTEI")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
@@ -215,6 +220,17 @@ func main() {
 		Handler: mux,
 	}
 
+	// Register signal handlers for graceful shutdown
+	done := make(chan struct{})
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-quit
+		log.Info().Msg("Shutting down gracefully")
+		_ = srv.Shutdown(ctx)
+		close(done)
+	}()
+
 	log.Info().Msg("Starting server on port 443")
 	if err := srv.ListenAndServeTLS(tlsCertFilePath, tlsKeyFilePath); err != nil {
 		if err == http.ErrServerClosed {
@@ -223,4 +239,5 @@ func main() {
 		}
 		log.Fatal().Err(err).Msg("Failed to start server")
 	}
+	<-done
 }
