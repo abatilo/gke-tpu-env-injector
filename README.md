@@ -74,9 +74,10 @@ the GitHub Container Registry as an OCI artifact:
 helm upgrade --install gke-tpu-env-injector oci://ghcr.io/abatilo/gke-tpu-env-injector --set cert-manager.enabled=true
 ```
 
-Setting `cert-manager.enabled=true` will request the required TLS certificates
-from `cert-manager` and mount them for `gke-tpu-env-injector` to be able to
-receive encrypted webhooks from the Kubernetes control plane.
+Setting `cert-manager.enabled=true` will both create certificate authority for
+self signed certificates as well as request the required TLS certificates from
+`cert-manager` and mount them for `gke-tpu-env-injector` to be able to receive
+encrypted webhooks from the Kubernetes control plane.
 
 ## Configuration
 
