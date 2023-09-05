@@ -19,6 +19,8 @@ manifests:
       setValues:
         cert-manager:
           enabled: true
+        additionalArguments:
+        - --verbose
 portForward:
 - resourceType: service
   resourceName: gke-tpu-env-injector
