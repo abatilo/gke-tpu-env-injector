@@ -18,9 +18,9 @@ Google Kubernetes Engine.
 
 The `tpu_driver` application, with the accompanying TPU device driver
 application that gets installed to GKE clusters with TPU support enabled
-actually require two interesting environment variables to be available to your
-applications when you run them. These environment variables are `TPU_WORKER_ID`
-and `TPU_WORKER_HOSTNAMES`.
+actually requires two environment variables to be available to your applications
+when you run them. These environment variables are `TPU_WORKER_ID` and
+`TPU_WORKER_HOSTNAMES`.
 
 Taken directly from the [GCP
 documentation](https://web.archive.org/web/20230904230344/https://cloud.google.com/kubernetes-engine/docs/how-to/tpus#:~:text=TPU_WORKER_ID%3A%20A%20unique,the%20TPU_WORKER_ID.):
@@ -39,7 +39,7 @@ hostnames are ordered and zero indexed by the TPU_WORKER_ID.
 These two environment variables require that you can dynamically inject the
 `TPU_WORKER_ID` into each application, and that `TPU_WORKER_HOSTNAMES` contains
 individually addressable DNS names for each specific worker, which will
-represent the pieces of a TPU PodSlice.
+represent the subsets of a TPU PodSlice.
 
 Conveniently, GKE will automatically inject these environment variables into
 pods for you BUT they will only do that under [very specific
@@ -51,9 +51,9 @@ webhook when a Job is created with the completionMode: Indexed, subdomain,
 parallelism > 1, and requesting google.com/tpu properties.
 ```
 
-However, what if you're not launching a Kubernetes `Job` at all? What if you
-have your own applications to launch that still need these environment
-variables? That's what `gke-tpu-env-injector` is for.
+What if you're not launching a Kubernetes `Job`? What if you have your own
+applications to launch that still need these environment variables? That's what
+`gke-tpu-env-injector` is for.
 
 `gke-tpu-env-injector` will do this same environment variable injection for
 Kubernetes `StatefulSet`s, which can also leverage a Kubernetes headless
@@ -85,3 +85,4 @@ encrypted webhooks from the Kubernetes control plane.
 | -------- | -------------------- | ----------- | ------- |
 | `--tls-cert-file` | `GTEI_TLS_CERT_FILE` | The path to the file containing the default x509 certificate for HTTPS.                | `/etc/tls/tls.crt`
 | `--tls-key-file`  | `GTEI_TLS_KEY_FILE`  | The path to the file containing the default x509 private key matching --tls-cert-file. | `/etc/tls/tls.key`
+| `--verbose`       | `GTEI_VERBOSE`       | Enable verbose logging.                                                                | `false`
